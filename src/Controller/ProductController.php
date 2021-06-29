@@ -111,7 +111,9 @@ class ProductController extends AbstractController
         $product = new Product;
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
+
             $product->setSlug(strtolower($slugger->slug($product->getName())));
             $em->persist($product);
             $em->flush();

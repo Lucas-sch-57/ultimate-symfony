@@ -6,22 +6,42 @@ use App\Entity\Category;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Repository\RepositoryFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CategoryController extends AbstractController
 {
+    protected $categoryRepository;
+
+    public function __construct(CategoryRepository $categoryRepository)
+    {
+        $this->categoryRepository = $categoryRepository;
+    }
+    public function renderMenuList()
+    {
+        //1. Aller chercher les catégories dans la base de données
+
+        $categories = $this->categoryRepository->findAll();
+
+        return $this->render('category/_menu.html.twig', [
+            'categories' => $categories
+        ]);
+    }
     /**
      * @Route("/admin/category/create", name="category_create")
      */
     public function create(EntityManagerInterface $em, Request $request, SluggerInterface $slugger)
     {
         $category = new Category;
-        $form = $this->createForm(CategoryType::class);
+
+        $form = $this->createForm(CategoryType::class, $category);
         $form->handleRequest($request);
-        if ($form->isSubmitted()) {
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $category->setSlug(strtolower($slugger->slug($category->getName())));
             $em->persist($category);
             $em->flush();
@@ -29,7 +49,8 @@ class CategoryController extends AbstractController
         }
         $formView = $form->createView();
         return $this->render('category/create.html.twig', [
-            'formView' => $formView
+            'formView' => $formView,
+            'slug' => $category->getSlug()
         ]);
     }
 
@@ -48,7 +69,7 @@ class CategoryController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $category->setSlug(strtolower($slugger->slug($category->getName())));
             $em->flush();
             return $this->redirectToRoute("homepage");
