@@ -24,6 +24,10 @@ class CartService
     {
         $this->session->set('cart', $cart);
     }
+    public function empty()
+    {
+        $this->saveCart([]);
+    }
 
     public function decrement(int $id)
     {
@@ -71,6 +75,9 @@ class CartService
         }
         return $total;
     }
+    /**
+     * @return CartItem[]
+     */
     public function getDetailedCartItems(): array
     {
         $detailedCart = [];
