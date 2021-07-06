@@ -13,8 +13,6 @@ class PrenomSubscriber implements EventSubscriberInterface
     {
         return [
             'kernel.request' => 'addPrenomToAttributes',
-            'kernel.controller' => 'test1',
-            'kernel.response' => 'test2',
         ];
     }
     public function addPrenomToAttributes(RequestEvent $requestEvent)
